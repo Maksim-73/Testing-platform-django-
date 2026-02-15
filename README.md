@@ -27,7 +27,7 @@
  Работа с изображениями: Pillow
  Формы и стилизация: django-crispy-forms 
 
-## Установка и запуск (локально)
+## 1. Установка и запуск 
 
 ```bash
 # 1. Клонируем репозиторий
@@ -35,29 +35,29 @@ git clone https://github.com/Maksim-73/Testing-platform-django-.git
 cd Testing-platform-django
 ```
 
-# 2. Создаём и активируем виртуальное окружение
+## 2. Создаём и активируем виртуальное окружение
 ```bash
 python -m venv venv
 source venv/bin/activate    # Linux / macOS
 venv\Scripts\activate       # Windows
 ```
 
-# 3. Устанавливаем зависимости
+## 3. Устанавливаем зависимости
 ```bash
 pip install -r requirements.txt
 ```
 
-# 4. Применяем миграции
+## 4. Применяем миграции
 ```bash
 python manage.py migrate
 ```
 
-# 5. Создаём суперпользователя (преподавателя)
+## 5. Создаём суперпользователя (преподавателя)
 ```bash
 python manage.py createsuperuser
 ```
 
-# 6. Запускаем сервер
+## 6. Запускаем сервер
 ```bash
 python manage.py runserver
 ```
@@ -66,3 +66,21 @@ python manage.py runserver
 
 ### Главная страница
 ![Главная страница](screenshots/main_page.jpg)
+
+### Создание теста 
+![Создание теста](screenshots/create_test.jpg)
+
+### Прохождение теста 
+![Прохождение теста](screenshots/run_test.jpg)
+
+### Завершение и результаты теста 
+![Результаты теста ](screenshots/test_result.jpg)
+
+### Статистика по студентам, прошедшим тест
+![Статистика](screenshots/stats_test.jpg)
+
+### Личный кабинет студента 
+![ЛК Студента](screenshots/lk_stud.jpg)
+
+### Личный кабинет преподавателя
+![ЛК Преподавателя](screenshots/lk_prepod.jpg)
