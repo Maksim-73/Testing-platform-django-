@@ -33,31 +33,36 @@
 # 1. Клонируем репозиторий
 git clone https://github.com/Maksim-73/Testing-platform-django-.git
 cd Testing-platform-django
+```
 
 # 2. Создаём и активируем виртуальное окружение
+```bash
 python -m venv venv
 source venv/bin/activate    # Linux / macOS
 venv\Scripts\activate       # Windows
+```
 
 # 3. Устанавливаем зависимости
+```bash
 pip install -r requirements.txt
+```
 
-# 4. Создаём .env файл (или просто задаём переменные окружения)
-# Пример содержимого .env
-SECRET_KEY=ваш_очень_длинный_секретный_ключ
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-
-# 5. Применяем миграции
+# 4. Применяем миграции
+```bash
 python manage.py migrate
+```
 
-# 6. Создаём суперпользователя (преподавателя)
+# 5. Создаём суперпользователя (преподавателя)
+```bash
 python manage.py createsuperuser
+```
 
-# 7. Запускаем сервер
+# 6. Запускаем сервер
+```bash
 python manage.py runserver
+```
 
 ## Скриншоты
 
 ### Главная страница
-![Главная страница](screenshots/главная страница.jpg)
+![Главная страница](screenshots/main_page.jpg)
