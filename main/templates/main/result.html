@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Результаты теста: {{ test.title }}</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Общая статистика</h3>
+            <div class="d-flex justify-content-between mb-3">
+                <div>
+                    <p class="mb-1"><strong>Оценка:</strong></p>
+                    <h4 class="text-{% if grade == 'Зачёт' %}success{% else %}danger{% endif %}">{{ grade }}</h4>
+                </div>
+                <div>
+                    <p class="mb-1"><strong>Процент правильных ответов:</strong></p>
+                    <h4>{{ score }}%</h4>
+                </div>
+                <div>
+                    <p class="mb-1"><strong>Набрано баллов:</strong></p>
+                    <h4>{{ correct|floatformat:2 }} / {{ total }}</h4>
+                </div>
+            </div>
+            <div class="progress mb-3" style="height: 30px;">
+                <div class="progress-bar bg-success" role="progressbar"
+                     style="width: {{ score }}%" aria-valuenow="{{ score }}"
+                     aria-valuemin="0" aria-valuemax="100">
+                    {{ correct|floatformat:2 }} баллов
+                </div>
+                <div class="progress-bar bg-danger" role="progressbar"
+                     style="width: {{ 100|subtract:score }}%"
+                     aria-valuenow="{{ 100|subtract:score }}"
+                     aria-valuemin="0" aria-valuemax="100">
+                    {{ total|subtract:correct|floatformat:2 }} баллов
+                </div>
+            </div>
+            <p class="mb-1"><strong>Всего вопросов:</strong> {{ total }}</p>
+            <p><strong>Полностью правильных:</strong> {{ fully_correct|default:"0" }}</p>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title mb-4">Подробные результаты</h3>
+            {% for result in results %}
+            <div class="question-result mb-4 p-3 border rounded">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h5>Вопрос {{ forloop.counter }}: {{ result.question.text }}</h5>
+                    <span class="badge bg-{% if result.score == 1 %}success{% elif result.score > 0 %}warning text-dark{% else %}danger{% endif %}">
+                        {{ result.score|floatformat:2 }} балла
+                    </span>
+                </div>
+                {% if result.question.is_text_answer %}
+                    <div class="answer-text mb-2 mt-3">
+                        <p class="mb-1"><strong>Ваш ответ:</strong>
+                            <span class="{% if result.is_correct %}text-success{% else %}text-danger{% endif %}">
+                                {{ result.answer_text|default_if_none:"-" }}
+                            </span>
+                        </p>
+                        {% if not result.is_correct and result.question.correct_text_answer %}
+                            <p class="mb-0"><strong>Правильный ответ:</strong> {{ result.question.correct_text_answer }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="options-list mt-3">
+                        {% for option in result.question.options.all %}
+                        <div class="option {% if option.is_correct %}correct-option{% endif %}
+                                    {% if option.id in result.selected_ids %}user-selected{% endif %}">
+                            <div class="form-check">
+                                <input type="{% if result.question.is_multiple_choice %}checkbox{% else %}radio{% endif %}"
+                                       class="form-check-input"
+                                       disabled
+                                       {% if option.id in result.selected_ids %}checked{% endif %}>
+                                <label class="form-check-label">
+                                    {{ option.text }}
+                                    {% if option.is_correct %}<span class="correct-badge">✓ Правильный</span>{% endif %}
+                                    {% if option.id in result.selected_ids and not option.is_correct %}
+                                        <span class="incorrect-badge">✗ Неправильно</span>
+                                    {% endif %}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if result.question.is_multiple_choice %}
+                    <div class="mt-3">
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar bg-{% if result.score == 1 %}success{% elif result.score > 0.5 %}warning{% else %}danger{% endif %}"
+                                 style="width: {% widthratio result.score 1 100 %}%">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>Правильно выбрано: {{ result.correct_selected }} из {{ result.total_correct }}</span>
+                            <span>Неправильно: {{ result.incorrect_selected }}</span>
+                        </div>
+                        {% if result.score < 1 and result.score > 0 %}
+                        <p class="small text-muted mt-1 mb-0">
+                            Частичный балл: ({{ result.correct_selected }} - {{ result.incorrect_selected }}) / {{ result.total_correct }} = {{ result.score|floatformat:2 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <a href="{% url 'index' %}" class="btn btn-primary">На главную</a>
+</div>
+{% endblock %}

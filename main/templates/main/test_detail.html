@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Тест: {{ test.title }}</h1>
+    <p class="mb-3">Описание: {{ test.description }}</p>
+    <p class="mb-3"><strong>Код теста:</strong> {{ test.code }}</p>
+    <h3 class="mb-4">Вопросы теста:</h3>
+    {% for question in test.questions.all %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Вопрос {{ forloop.counter }}: {{ question.text }}</h5>
+            <p class="mb-3">
+                {% if question.is_text_answer %}
+                    <span class="badge bg-info">Текстовый ответ</span>
+                {% else %}
+                    {% if question.is_multiple_choice %}
+                        <span class="badge bg-warning">Множественный выбор</span>
+                    {% else %}
+                        <span class="badge bg-primary">Одиночный выбор</span>
+                    {% endif %}
+                {% endif %}
+            </p>
+            {% if not question.is_text_answer %}
+                <h6 class="mb-3">Варианты ответов:</h6>
+                <ul class="list-group">
+                    {% for option in question.options.all %}
+                    <li class="list-group-item {% if option.is_correct %}list-group-item-success{% endif %}">
+                        {{ option.text }}
+                        {% if option.is_correct %}<span class="badge bg-success float-end">✓</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    <h3 class="mb-4">Предпросмотр для студента:</h3>
+    <div class="border p-4 mb-4">
+        {% include 'main/test_preview.html' %}
+    </div>
+    <a href="{% url 'create_test' %}" class="btn btn-primary">Создать новый тест</a>
+</div>
+{% endblock %}

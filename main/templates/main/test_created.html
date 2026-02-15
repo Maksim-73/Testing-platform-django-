@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Тест успешно создан!</h2>
+    <p class="mb-4"><strong>Код теста:</strong> <span class="text-primary">{{ test_code }}</span></p>
+    <div class="mb-3">
+        <a href="{% url 'test_detail' test_id=test.id %}" class="btn btn-primary">Просмотреть тест</a>
+        <a href="{% url 'index' %}" class="btn btn-secondary ms-2">На главную</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<!-- Hero-баннер -->
+<link rel="stylesheet" href="{% static 'main/css/styles.css' %}">
+<section class="hero-section text-center text-white bg-primary py-5">
+    <div class="container">
+        <h1 class="display-4 mb-3">Добро пожаловать на платформу тестирования!</h1>
+        <p class="lead mb-4">Создавайте, проходите и анализируйте тесты с легкостью и удовольствием.</p>
+        {% if user.is_authenticated %}
+            <a href="{% if user_role == 'student' %}{% url 'student_dashboard' %}{% else %}{% url 'teacher_dashboard' %}{% endif %}" class="btn btn-light btn-lg mx-2">В личный кабинет</a>
+            {% if user_role == 'teacher' %}
+                <a href="{% url 'create_test' %}" class="btn btn-outline-light btn-lg mx-2">Создать тест</a>
+            {% else %}
+                <a href="{% url 'enter_test_code' %}" class="btn btn-outline-light btn-lg mx-2">Пройти тест</a>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'register' %}" class="btn btn-light btn-lg mx-2">Зарегистрироваться</a>
+            <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg mx-2">Войти</a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Секция преимуществ -->
+<section class="features-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Почему выбирают нашу платформу?</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="bi bi-book fs-1 text-primary mb-3"></i>
+                        <h5 class="card-title">Удобное создание тестов</h5>
+                        <p class="card-text">Преподаватели могут легко создавать тесты с разными типами вопросов.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle fs-1 text-primary mb-3"></i>
+                        <h5 class="card-title">Автоматическая проверка</h5>
+                        <p class="card-text">Получайте результаты сразу после прохождения с подробной статистикой.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <i class="bi bi-person fs-1 text-primary mb-3"></i>
+                        <h5 class="card-title">Персональный кабинет</h5>
+                        <p class="card-text">Следите за прогрессом и управляйте своими тестами в одном месте.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Секция последних тестов (только для авторизованных) -->
+{% if user.is_authenticated %}
+<section class="tests-section py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">
+            {% if user_role == 'student' %}Доступные тесты{% else %}Ваши последние тесты{% endif %}
+        </h2>
+        {% if tests %}
+        <div class="row">
+            {% for test in tests %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ test.title }}</h5>
+                        <p class="card-text">
+                            {% if user_role == 'student' %}
+                                Пройден: {{ test.student_count }} студент{% if test.student_count != 1 %}ов{% endif %}
+                            {% else %}
+                                Создан: {{ test.created_at|date:"d.m.Y" }}<br>
+                                Пройден: {{ test.student_count }} студент{% if test.student_count != 1 %}ов{% endif %}
+                            {% endif %}
+                        </p>
+                        {% if user_role == 'student' %}
+                            <a href="{% url 'start_test' test.id %}" class="btn btn-primary">Пройти тест</a>
+                        {% else %}
+                            <a href="{% url 'test_results' test.id %}" class="btn btn-primary">Результаты</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center">
+            {% if user_role == 'student' %}
+                Нет доступных тестов. <a href="{% url 'enter_test_code' %}">Ввести код теста</a>.
+            {% else %}
+                Вы ещё не создали тесты. <a href="{% url 'create_test' %}">Создать тест</a>.
+            {% endif %}
+        </p>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

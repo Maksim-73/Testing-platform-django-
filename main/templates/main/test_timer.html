@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Тест: {{ test.title }}</h2>
+    <p class="mb-3">{{ test.description }}</p>
+    <p class="mb-3"><strong>Время:</strong> {{ test.time_limit }} минут</p>
+    <div id="timer" class="mb-3 text-danger fw-bold"></div>
+    <form method="post" action="{% url 'submit_answers' test.id %}">
+        {% csrf_token %}
+        {% for question in test.questions.all %}
+        <div class="card mb-4">
+            <div class="card-body">
+                {% if question.image %}
+                <img src="{{ question.image.url }}" class="img-fluid mb-3" style="max-width: 600px;" alt="Вопрос">
+                {% endif %}
+                <h5 class="card-title">{{ forloop.counter }}. {{ question.text }}</h5>
+                {% if question.is_text_answer %}
+                    <input type="text" name="answer_{{ question.id }}" class="form-control mb-3" required>
+                {% else %}
+                    <div class="options-list">
+                        {% for option in question.options.all %}
+                        <div class="form-check {% if question.is_multiple_choice %}mb-2{% else %}mb-3{% endif %}">
+                            <input type="{% if question.is_multiple_choice %}checkbox{% else %}radio{% endif %}"
+                                   name="answer_{{ question.id }}"
+                                   value="{{ option.id }}"
+                                   class="form-check-input"
+                                   {% if not question.is_multiple_choice %}required{% endif %}>
+                            <label class="form-check-label">{{ option.text }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Завершить тест</button>
+    </form>
+</div>
+<script>
+    let seconds = {{ test.time_limit }} * 60;
+    const timer = document.getElementById('timer');
+    function updateTimer() {
+        const min = Math.floor(seconds / 60);
+        const sec = seconds % 60;
+        timer.innerText = `Осталось: ${min} мин ${sec} сек`;
+        seconds--;
+        if (seconds < 0) {
+            document.forms[0].submit();
+        } else {
+            setTimeout(updateTimer, 1000);
+        }
+    }
+    updateTimer();
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const questionId = this.name.split('_')[1];
+                document.querySelectorAll(`input[name="answer_${questionId}"]`).forEach(input => {
+                    if (input !== this) {
+                        input.checked = false;
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

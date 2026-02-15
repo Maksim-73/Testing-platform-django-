@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2>Создание теста</h2>
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <strong>Ошибки в форме:</strong>
+        {{ form.errors }}
+    </div>
+    {% endif %}
+
+    <form method="post" id="test-form" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Основные поля -->
+        <div class="mb-3">
+            <label class="form-label">Название</label>
+            {{ form.title }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Описание</label>
+            {{ form.description }}
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Ограничение по времени</label>
+            {{ form.time_limit }}
+        </div>
+
+        <!-- Секция оценивания -->
+        <div class="grading-section">
+            <h4>Настройки оценивания</h4>
+            <div class="mb-3">
+                {{ form.load_template.label_tag }}
+                {{ form.load_template }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.grading_type.label_tag }}
+                {{ form.grading_type }}
+            </div>
+
+            <div id="differentiated_fields" style="display: none;">
+                <div class="mb-3">
+                    {{ form.threshold_2.label_tag }}
+                    {{ form.threshold_2 }}
+                </div>
+                <div class="mb-3">
+                    {{ form.threshold_3.label_tag }}
+                    {{ form.threshold_3 }}
+                </div>
+                <div class="mb-3">
+                    {{ form.threshold_4.label_tag }}
+                    {{ form.threshold_4 }}
+                </div>
+                <div class="mb-3">
+                    {{ form.threshold_5.label_tag }}
+                    {{ form.threshold_5 }}
+                </div>
+                <p><strong>Пример:</strong> Если студент наберёт <span id="example_score">75</span>%, его оценка будет: <span id="example_grade_differentiated">4</span></p>
+            </div>
+
+            <div id="non_differentiated_fields" style="display: none;">
+                <div class="mb-3">
+                    {{ form.pass_threshold.label_tag }}
+                    {{ form.pass_threshold }}
+                </div>
+                <p><strong>Пример:</strong> Если студент наберёт <span id="example_score_non">75</span>%, это будет: <span id="example_grade_non_differentiated">Зачёт</span></p>
+            </div>
+
+            <div class="mb-3 form-check">
+                {{ form.save_as_template }}
+                {{ form.save_as_template.label_tag }}
+            </div>
+            <div class="mb-3" id="template_name_field" style="display: none;">
+                {{ form.template_name.label_tag }}
+                {{ form.template_name }}
+            </div>
+        </div>
+
+        <!-- Контейнер вопросов -->
+        <div id="questions-container">
+            {% for question in initial_questions %}
+            <div class="question-container card mb-3" data-question-index="{{ forloop.counter0 }}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Вопрос <span class="question-number">{{ forloop.counter }}</span></h4>
+                    <button type="button" class="btn btn-sm btn-danger remove-question">Удалить</button>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <label class="form-label">Текст вопроса:</label>
+                        <input type="text" name="question_{{ forloop.counter0 }}_text" class="form-control question-text" required>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input type="checkbox" name="question_{{ forloop.counter0 }}_is_text_answer"
+                               class="form-check-input text-answer-checkbox"
+                               id="q{{ forloop.counter0 }}_text_answer">
+                        <label class="form-check-label" for="q{{ forloop.counter0 }}_text_answer">Текстовый ответ</label>
+                    </div>
+
+                    <div class="correct-text-answer-container mb-2" style="display: none;">
+                        <label class="form-label">Правильный ответ:</label>
+                        <input type="text" name="question_{{ forloop.counter0 }}_correct_text_answer"
+                               class="form-control correct-text-answer-input">
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input type="checkbox" name="question_{{ forloop.counter0 }}_is_multiple_choice"
+                               class="form-check-input multiple-choice-checkbox"
+                               id="q{{ forloop.counter0 }}_multiple_choice">
+                        <label class="form-check-label" for="q{{ forloop.counter0 }}_multiple_choice">Множественный выбор</label>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input type="checkbox" name="question_{{ forloop.counter0 }}_has_image"
+                               class="form-check-input image-checkbox"
+                               id="q{{ forloop.counter0 }}_has_image">
+                        <label class="form-check-label" for="q{{ forloop.counter0 }}_has_image">Добавить изображение</label>
+                    </div>
+
+                    <div class="image-container mb-2" style="display: none;">
+                        <label class="form-label">Изображение:</label>
+                        <div class="drag-drop" id="drag-drop-{{ forloop.counter0 }}">
+                            Перетащите или кликните
+                        </div>
+                        <input type="file" name="question_{{ forloop.counter0 }}_image" class="form-control-file d-none"
+                               accept="image/*" id="image-{{ forloop.counter0 }}">
+                        <img id="preview-{{ forloop.counter0 }}" class="image-preview mt-1" src="#" alt="Предпросмотр" style="display: none;">
+                        <button type="button" class="btn btn-sm btn-danger remove-image mt-1" style="display: none;">Удалить</button>
+                    </div>
+
+                    <div class="options-container">
+                        <h5>Варианты:</h5>
+                        {% for option in question.options %}
+                        <div class="option-item mb-2">
+                            <div class="input-group">
+                                <input type="text" name="question_{{ forloop.parentloop.counter0 }}_option_{{ forloop.counter0 }}_text"
+                                       class="form-control option-text" placeholder="Текст варианта" required>
+                                <div class="input-group-text">
+                                    <input type="checkbox"
+                                           name="question_{{ forloop.parentloop.counter0 }}_option_{{ forloop.counter0 }}_is_correct"
+                                           class="form-check-input correct-answer-selector">
+                                    <label class="form-check-label ms-2">Правильный</label>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger remove-option">×</button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <button type="button" class="btn btn-sm btn-outline-secondary add-option">+ Добавить вариант</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" id="add-question" class="btn btn-secondary mb-3">+ Добавить вопрос</button>
+        <button type="submit" class="btn btn-success">Сохранить</button>
+    </form>
+</div>
+
+<!-- Передаём данные о шаблонах в JavaScript -->
+<script>
+    // Данные о шаблонах для автозаполнения
+    const templatesData = {
+        {% for template in form.fields.load_template.queryset %}
+        "{{ template.id }}": {
+            grading_type: "{{ template.grading_type }}",
+            threshold_2: {{ template.threshold_2|default_if_none:"null" }},
+            threshold_3: {{ template.threshold_3|default_if_none:"null" }},
+            threshold_4: {{ template.threshold_4|default_if_none:"null" }},
+            threshold_5: {{ template.threshold_5|default_if_none:"null" }},
+            pass_threshold: {{ template.pass_threshold|default_if_none:"null" }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadTemplateSelect = document.querySelector('[name="load_template"]');
+        const gradingTypeSelect = document.querySelector('[name="grading_type"]');
+        const threshold2Input = document.querySelector('[name="threshold_2"]');
+        const threshold3Input = document.querySelector('[name="threshold_3"]');
+        const threshold4Input = document.querySelector('[name="threshold_4"]');
+        const threshold5Input = document.querySelector('[name="threshold_5"]');
+        const passThresholdInput = document.querySelector('[name="pass_threshold"]');
+        const differentiatedFields = document.getElementById('differentiated_fields');
+        const nonDifferentiatedFields = document.getElementById('non_differentiated_fields');
+
+        loadTemplateSelect.addEventListener('change', function() {
+            const templateId = this.value;
+            if (templateId && templatesData[templateId]) {
+                const template = templatesData[templateId];
+                // Заполняем поля формы
+                gradingTypeSelect.value = template.grading_type;
+                threshold2Input.value = template.threshold_2 !== null ? template.threshold_2 : '';
+                threshold3Input.value = template.threshold_3 !== null ? template.threshold_3 : '';
+                threshold4Input.value = template.threshold_4 !== null ? template.threshold_4 : '';
+                threshold5Input.value = template.threshold_5 !== null ? template.threshold_5 : '';
+                passThresholdInput.value = template.pass_threshold !== null ? template.pass_threshold : '';
+
+                // Обновляем видимость полей
+                if (template.grading_type === 'differentiated') {
+                    differentiatedFields.style.display = 'block';
+                    nonDifferentiatedFields.style.display = 'none';
+                } else {
+                    differentiatedFields.style.display = 'none';
+                    nonDifferentiatedFields.style.display = 'block';
+                }
+
+                // Триггерим событие change для grading_type, чтобы обновить примеры оценок (если есть такая логика в main.js)
+                const changeEvent = new Event('change');
+                gradingTypeSelect.dispatchEvent(changeEvent);
+            }
+        });
+    });
+</script>
+
+<script src="{% static 'main/js/main.js' %}"></script>
+{% endblock %}

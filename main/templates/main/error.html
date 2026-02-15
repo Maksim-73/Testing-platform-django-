@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-4 text-danger">Ошибка</h2>
+    <div class="alert alert-danger mb-4">
+        {{ message }}
+    </div>
+    <a href="{% url 'index' %}" class="btn btn-primary">На главную</a>
+</div>
+{% endblock %}

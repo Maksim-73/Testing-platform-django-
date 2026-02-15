@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="form-container" style="max-width: 500px; margin-right: auto; margin-left: auto;">
+        <h2 class="mb-4">Поиск теста по коду</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="id_code" class="form-label">Введите код теста</label>
+                            {{ form.code }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </form>
+        {% if error %}
+        <div class="alert alert-danger mt-3">
+            {{ error }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Стили для формы */
+    .form-group .form-control {
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 400;
+        color: #333;
+        background-color: #fff;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        max-width: 500px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .form-group .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+        outline: none;
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}

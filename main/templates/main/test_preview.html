@@ -1,0 +1,23 @@
+<h4 class="mb-3">{{ test.title }}</h4>
+<p class="mb-3"><strong>Время на выполнение:</strong> {{ test.time_limit }} минут</p>
+<form>
+    {% for question in test.questions.all %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ forloop.counter }}. {{ question.text }}</h5>
+            {% if question.is_text_answer %}
+                <input type="text" class="form-control mb-3" disabled placeholder="Текстовый ответ">
+            {% else %}
+                {% for option in question.options.all %}
+                <div class="form-check mb-2">
+                    <input type="{% if question.is_multiple_choice %}checkbox{% else %}radio{% endif %}"
+                           class="form-check-input"
+                           disabled>
+                    <label class="form-check-label">{{ option.text }}</label>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</form>
